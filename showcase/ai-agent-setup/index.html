@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viper Digital Studio — Websites, Apps and Bots</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Italiana&family=Outfit:wght@300;400;600&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+
+        html, body {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        body {
+            min-height: 900vh;
+            font-family: 'Outfit', sans-serif;
+            color: #ffffff;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        * { cursor: none !important; }
+
+        ::-webkit-scrollbar { display: none; width: 0; }
+
+        #webgl {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            outline: none;
+        }
+
+        .cursor-inner, .cursor-outer {
+            position: fixed;
+            pointer-events: none;
+            z-index: 99999;
+        }
+
+        .cursor-inner {
+            width: 6px;
+            height: 6px;
+            border: 2px solid rgba(255, 255, 255, 1);
+            border-radius: 50%;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-outer {
+            width: 40px;
+            height: 40px;
+            border: 1.5px solid rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background 0.3s;
+        }
+
+        .cinematic-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0 60px 40px 60px;
+            box-sizing: border-box;
+        }
+
+        .main-header {
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; z-index: 20;
+            pointer-events: auto;
+            padding: 20px 0;
+        }
+        .brand { font-size: 14px; font-weight: 600; letter-spacing: 5px; text-transform: uppercase; }
+        .header-nav { display: flex; align-items: center; gap: 24px; }
+        .nav-link {
+            color: #ffffff; text-decoration: none;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+            font-weight: 500; transition: color 0.3s;
+        }
+        .nav-link:hover { color: rgba(255,255,255,0.6); }
+        .nav-dot { width: 3px; height: 3px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; }
+        .contact-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 24px;
+            background: #ffffff; color: #000000;
+            text-decoration: none;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+            border-radius: 20px;
+            transition: transform 0.3s, background 0.3s;
+        }
+        .btn-circle {
+            display: inline-block; width: 6px; height: 6px;
+            border: 1px solid #000000; border-radius: 50%; background: transparent;
+        }
+        .contact-btn:hover { transform: scale(1.05); background: #f0f0f0; }
+
+        .slide { position: absolute; bottom: 12%; pointer-events: none; }
+
+        #slide-1 { left: 0; width: 100%; }
+        #slide-1 .slide-title { margin-left: 60px; }
+        #slide-1 .desc-row { position: relative; display: flex; width: 100%; }
+        #slide-1 .col-1 {
+            margin-left: 60px;
+            width: calc(25vw - 60px);
+            max-width: calc(25vw - 60px);
+        }
+        #slide-1 .col-2 {
+            position: absolute;
+            left: calc(25vw + 40px);
+            width: calc(25vw - 60px);
+            max-width: calc(25vw - 60px);
+        }
+
+        #slide-2 { left: 0; width: 100%; }
+        #slide-2 .slide-title { margin-left: calc(25vw + 40px); }
+        #slide-2 .slide-desc {
+            margin-left: calc(50vw + 20px);
+            width: calc(25vw - 60px);
+            max-width: calc(25vw - 60px);
+        }
+
+        #slide-3 {
+            left: calc(50vw + 20px);
+            width: calc(25vw - 60px);
+            max-width: calc(25vw - 60px);
+        }
+        #slide-3 .slide-title { font-size: clamp(40px, 6vw, 92px); }
+
+        #slide-4 { left: calc(25% + 40px); max-width: 600px; }
+
+        .slide-title {
+            font-family: 'Italiana', serif;
+            font-size: clamp(44px, 8vw, 116px);
+            line-height: 1.02;
+            font-weight: 400;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            color: #fff6ed;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        .slide-desc {
+            font-size: 16px; line-height: 1.7; font-weight: 300;
+            color: #d1d5db; letter-spacing: 0.5px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transition-delay: 0.4s;
+        }
+        .slide.active .slide-desc { opacity: 1; transform: translateY(0); }
+
+        .slide-title .char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(50px);
+            filter: blur(12px);
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        filter 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .slide.active .slide-title .char { opacity: 1; transform: translateY(0); filter: blur(0); }
+        .slide.active { pointer-events: auto; }
+
+        .order-panel {
+            width: min(520px, 100%);
+        }
+
+        .price-lines {
+            display: grid;
+            gap: 8px;
+            margin: 18px 0 18px;
+            max-width: 420px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transition-delay: 0.55s;
+        }
+
+        .slide.active .price-lines {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .price-lines div {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.14);
+            font-size: 13px;
+            color: #d1d5db;
+            letter-spacing: 0.4px;
+        }
+
+        .price-lines strong {
+            color: #fff6ed;
+            font-weight: 600;
+        }
+
+        .contact-form {
+            display: grid;
+            gap: 10px;
+            width: min(420px, 100%);
+            margin-top: 18px;
+            pointer-events: auto;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            transition-delay: 0.7s;
+        }
+
+        .slide.active .contact-form {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .contact-form input,
+        .contact-form select,
+        .contact-form textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #ffffff;
+            padding: 12px 14px;
+            border-radius: 18px;
+            outline: none;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 300;
+            letter-spacing: 0.4px;
+            backdrop-filter: blur(12px);
+        }
+
+        .contact-form select option { color: #000000; }
+
+        .contact-form textarea {
+            min-height: 82px;
+            resize: none;
+        }
+
+        .contact-form input:focus,
+        .contact-form select:focus,
+        .contact-form textarea:focus {
+            border-color: rgba(255,255,255,0.55);
+        }
+
+        .contact-form button,
+        .telegram-link {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px 22px;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            border-radius: 20px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            transition: transform 0.3s, background 0.3s;
+        }
+
+        .contact-form button:hover,
+        .telegram-link:hover {
+            transform: scale(1.04);
+            background: #f0f0f0;
+        }
+
+        .telegram-link {
+            margin-top: 12px;
+            width: min(420px, 100%);
+            pointer-events: auto;
+            text-decoration: none;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        background 0.3s;
+            transition-delay: 0.85s;
+        }
+
+        .slide.active .telegram-link {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 32px;
+            transform: translate(-50%, 30px);
+            opacity: 0;
+            padding: 14px 20px;
+            background: rgba(255,255,255,0.94);
+            color: #000000;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.4px;
+            z-index: 99999;
+            pointer-events: none;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        .toast.active {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        .grid-horizontal-line {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(255,255,255,0.12);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .grid-lines {
+            position: fixed;
+            top: 0;
+            left: 40px;
+            right: 40px;
+            width: calc(100% - 80px);
+            height: 100vh;
+            display: flex;
+            justify-content: space-between;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .grid-line {
+            position: relative;
+            width: 1px;
+            height: 100%;
+            background: rgba(255,255,255,0.12);
+        }
+
+        .grid-dot {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            box-shadow: 0 0 4px rgba(255,255,255,0.15);
+        }
+
+        .story-progress-container {
+            position: relative;
+        }
+
+        .story-dashes {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .story-dash {
+            width: 2px;
+            height: 40px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .story-dash-fill {
+            width: 100%;
+            height: 0%;
+            background: #ffffff;
+            border-radius: 2px;
+            transition: height 0.3s ease;
+        }
+
+        @media (max-width: 900px) {
+            .cinematic-container { padding: 0 24px 28px 24px; }
+            .header-nav { display: none; }
+            #slide-1 .slide-title,
+            #slide-1 .col-1 { margin-left: 0; }
+            #slide-1 .col-1 { width: 100%; max-width: 100%; }
+            #slide-1 .col-2 { display: none; }
+            #slide-2 .slide-title { margin-left: 0; }
+            #slide-2 .slide-desc { margin-left: 0; width: 100%; max-width: 100%; }
+            #slide-3 { left: 24px; right: 24px; width: auto; max-width: none; }
+            #slide-3 .slide-title { font-size: clamp(44px, 11vw, 92px); }
+            #slide-4 { left: 24px; right: 24px; max-width: none; }
+            .slide-desc { font-size: 15px; }
+            .grid-lines { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor-inner"></div>
+    <div class="cursor-outer"></div>
+
+    <div class="cinematic-container">
+        <div class="main-header">
+            <div class="brand">Viper Digital</div>
+            <nav class="header-nav">
+                <a href="#slide-1" class="nav-link">Web</a>
+                <span class="nav-dot"></span>
+                <a href="#slide-2" class="nav-link">Apps</a>
+                <span class="nav-dot"></span>
+                <a href="#slide-3" class="nav-link">Bots</a>
+                <span class="nav-dot"></span>
+                <a href="#slide-4" class="nav-link">Order</a>
+            </nav>
+            <div class="header-actions">
+                <a href="#slide-4" class="contact-btn">Start Project <span class="btn-circle"></span></a>
+            </div>
+        </div>
+
+        <div>
+            <div class="slide" id="slide-1">
+                <h2 class="slide-title">Websites <br>That Sell</h2>
+                <div class="desc-row">
+                    <p class="slide-desc col-1">Premium websites and landing pages for businesses, founders and digital products. Sharp structure, cinematic visuals, fast loading and a focused first impression.</p>
+                    <p class="slide-desc col-2">We build interfaces that feel expensive, work smoothly and guide visitors toward action. Design, frontend and launch-ready delivery in one clean process.</p>
+                </div>
+            </div>
+
+            <div class="slide" id="slide-2">
+                <h2 class="slide-title">Android <br>Apps</h2>
+                <p class="slide-desc">Mobile applications for Android: utilities, business tools, client apps and MVP products with clean screens, smooth flows and scalable logic.</p>
+            </div>
+
+            <div class="slide" id="slide-3">
+                <h2 class="slide-title">Telegram Bots</h2>
+                <p class="slide-desc">Automation bots for orders, support, notifications, shops and internal workflows. Fast scenarios, clean commands, useful menus and reliable integrations.</p>
+            </div>
+
+            <div class="slide" id="slide-4">
+                <h2 class="slide-title">Start <br>Your Project</h2>
+
+                <div class="order-panel">
+                    <p class="slide-desc">Websites, landing pages, Android apps and Telegram bots built with a premium visual system and fast delivery.</p>
+
+                    <div class="price-lines">
+                        <div><span>Landing Page</span><strong>from $150</strong></div>
+                        <div><span>Business Website</span><strong>from $400</strong></div>
+                        <div><span>Telegram Bot</span><strong>from $300</strong></div>
+                        <div><span>Android App</span><strong>from $900</strong></div>
+                    </div>
+
+                    <form class="contact-form" id="contact-form">
+                        <input type="text" name="name" placeholder="Name" required>
+                        <input type="text" name="contact" placeholder="Telegram or Email" required>
+                        <select name="project" required>
+                            <option value="">Project Type</option>
+                            <option>Landing Page</option>
+                            <option>Website</option>
+                            <option>Web Application</option>
+                            <option>Android Application</option>
+                            <option>Telegram Bot</option>
+                        </select>
+                        <textarea name="message" placeholder="Project details" required></textarea>
+                        <button type="submit">Prepare Request</button>
+                    </form>
+
+                    <a class="telegram-link" href="https://t.me/susopki" target="_blank" rel="noreferrer">Open Telegram</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-horizontal-line"></div>
+    <div class="grid-lines">
+        <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+        <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+        <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+        <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+        <div class="grid-line story-progress-container">
+            <div class="grid-dot top"></div>
+            <div class="grid-dot bottom"></div>
+            <div class="story-dashes">
+                <div class="story-dash"><div class="story-dash-fill" id="dash-fill-1"></div></div>
+                <div class="story-dash"><div class="story-dash-fill" id="dash-fill-2"></div></div>
+                <div class="story-dash"><div class="story-dash-fill" id="dash-fill-3"></div></div>
+                <div class="story-dash"><div class="story-dash-fill" id="dash-fill-4"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Request prepared. Contact us on Telegram to send the details.</div>
+
+    <canvas id="webgl"></canvas>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+      }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        const canvas = document.querySelector('#webgl');
+        let scene, camera, renderer;
+        const clock = new THREE.Clock();
+        let currentScroll = 0;
+
+        let mouseX = 0, mouseY = 0, targetMouseX = 0, targetMouseY = 0;
+        let cursorX = window.innerWidth / 2, cursorY = window.innerHeight / 2;
+        let outerCursorX = window.innerWidth / 2, outerCursorY = window.innerHeight / 2;
+
+        let sparkGroup;
+        let sparkParticles;
+        const sparkCount = 450;
+        const sparkData = [];
+
+        const sizes = { width: window.innerWidth, height: window.innerHeight };
+
+        const shaderUniforms = {
+            uTime: { value: 0 },
+            uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+            uMouse: { value: new THREE.Vector2(0, 0) },
+            uScroll: { value: 0 }
+        };
+
+        // ---------- Scene / camera / renderer ----------
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color('#000000');
+        scene.fog = new THREE.FogExp2('#000000', 0.01);
+
+        camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100);
+        camera.position.set(0, 0.2, 3.0);
+        scene.add(camera);
+
+        createBackgroundShader();
+
+        renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            antialias: true,
+            alpha: false,
+            powerPreference: "high-performance"
+        });
+        renderer.setSize(sizes.width, sizes.height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 2.2;
+
+        // ---------- Background liquid-bronze wave shader ----------
+        function createBackgroundShader() {
+            const vertexShader = `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `;
+
+            const fragmentShader = `
+                varying vec2 vUv;
+                uniform float uTime;
+                uniform vec2 uResolution;
+                uniform vec2 uMouse;
+                uniform float uScroll;
+
+                float hash(float n) { return fract(sin(n) * 43758.5453123); }
+                float noise(in vec3 x) {
+                    vec3 p = floor(x);
+                    vec3 f = fract(x);
+                    f = f*f*(3.0-2.0*f);
+                    float n = p.x + p.y*57.0 + 113.0*p.z;
+                    return mix(mix(mix(hash(n+  0.0), hash(n+  1.0), f.x),
+                                   mix(hash(n+ 57.0), hash(n+ 58.0), f.x), f.y),
+                               mix(mix(hash(n+113.0), hash(n+114.0), f.x),
+                                   mix(hash(n+170.0), hash(n+171.0), f.x), f.y), f.z);
+                }
+
+                void main() {
+                    vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution.xy) / uResolution.y;
+                    float aspect = uResolution.x / uResolution.y;
+
+                    float time = uTime * 0.08;
+                    float scroll = uScroll;
+
+                    float angle1 = 0.6;
+                    float angle2 = -0.7;
+                    float angle3 = 1.2;
+
+                    float freq1 = 2.4;
+                    float freq2 = 3.2;
+                    float freq3 = 4.0;
+
+                    vec2 warpedUv = uv;
+
+                    float scrollDeform = scroll * 5.0;
+
+                    warpedUv.x += sin(uv.y * 2.5 + time * 0.2 + scrollDeform) * 0.35;
+                    warpedUv.y += cos(uv.x * 2.5 - time * 0.15 - scrollDeform * 0.8) * 0.35;
+
+                    warpedUv.x += sin(uv.y * 1.2 - time * 0.1 - scrollDeform * 1.5) * 0.25;
+                    warpedUv.y += cos(uv.x * 1.2 + time * 0.18 + scrollDeform * 1.2) * 0.25;
+
+                    vec2 scrollDrift = vec2(scroll * 0.04, -scroll * 0.02);
+                    vec2 mouseShift = vec2(uMouse.x * aspect * 0.05, uMouse.y * 0.05);
+                    warpedUv += scrollDrift + mouseShift;
+
+                    vec2 dir1 = vec2(cos(angle1), sin(angle1));
+                    vec2 dir2 = vec2(cos(angle2), sin(angle2));
+                    vec2 dir3 = vec2(cos(angle3), sin(angle3));
+
+                    float w1 = sin(dot(warpedUv, dir1) * freq1 + time * 1.0);
+                    float w2 = cos(dot(warpedUv, dir2) * freq2 - time * 1.4 + w1 * 0.4);
+                    float w3 = sin(dot(warpedUv, dir3) * freq3 + time * 1.8 + w2 * 0.5);
+
+                    float waveField = w1 * 0.50 + w2 * 0.35 + w3 * 0.15;
+
+                    float wideSheen = pow(max(0.0, 1.0 - abs(waveField - 0.1)), 2.5);
+                    float crispSpecular = pow(max(0.0, 1.0 - abs(waveField - 0.15)), 8.0);
+                    float crest = wideSheen * 0.5 + crispSpecular * 0.9;
+
+                    vec3 c0_shadow = vec3(0.0010, 0.0006, 0.0004);
+                    vec3 c0_wave1  = vec3(0.085, 0.040, 0.015);
+                    vec3 c0_wave2  = vec3(0.050, 0.022, 0.008);
+                    vec3 c0_crest  = vec3(0.45, 0.30, 0.18);
+
+                    vec3 c1_shadow = vec3(0.0004, 0.0006, 0.0012);
+                    vec3 c1_wave1  = vec3(0.015, 0.035, 0.065);
+                    vec3 c1_wave2  = vec3(0.008, 0.020, 0.045);
+                    vec3 c1_crest  = vec3(0.18, 0.35, 0.55);
+
+                    float t = smoothstep(0.0, 1.0, scroll);
+                    vec3 colShadow = mix(c0_shadow, c1_shadow, t);
+                    vec3 colWave1  = mix(c0_wave1, c1_wave1, t);
+                    vec3 colWave2  = mix(c0_wave2, c1_wave2, t);
+                    vec3 colCrest  = mix(c0_crest, c1_crest, t);
+
+                    vec3 color = colShadow;
+                    color = mix(color, colWave2, smoothstep(-0.6, 0.2, waveField));
+                    color = mix(color, colWave1, smoothstep(0.0, 0.8, waveField));
+
+                    color += colCrest * crest * 1.4;
+
+                    float vignette = 1.0 - dot(uv, uv) * 0.12;
+                    color *= vignette;
+
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `;
+
+            const bgMaterial = new THREE.ShaderMaterial({
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader,
+                uniforms: shaderUniforms,
+                depthWrite: false,
+                depthTest: false
+            });
+
+            const bgGeometry = new THREE.PlaneGeometry(30, 30);
+            const bgMesh = new THREE.Mesh(bgGeometry, bgMaterial);
+            bgMesh.position.set(0.0, 0.0, -8.0);
+            bgMesh.renderOrder = -10;
+            camera.add(bgMesh);
+        }
+
+        // ---------- Forge sparks ----------
+        function createSparkTexture() {
+            const c = document.createElement('canvas');
+            c.width = 16; c.height = 16;
+            const ctx = c.getContext('2d');
+            const gradient = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.85)');
+            gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.3)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 16, 16);
+            return new THREE.CanvasTexture(c);
+        }
+
+        function createSparks() {
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(sparkCount * 3);
+            const colors = new Float32Array(sparkCount * 3);
+
+            for (let i = 0; i < sparkCount; i++) {
+                const x = (Math.random() - 0.5) * 6.5;
+                const y = (Math.random() - 0.5) * 5.0 - 0.5;
+                const z = (Math.random() - 0.5) * 6.5;
+                positions[i * 3] = x;
+                positions[i * 3 + 1] = y;
+                positions[i * 3 + 2] = z;
+
+                if (Math.random() < 0.6) {
+                    colors[i * 3] = 1.0;
+                    colors[i * 3 + 1] = 0.4 + Math.random() * 0.15;
+                    colors[i * 3 + 2] = 0.05 + Math.random() * 0.1;
+                } else {
+                    colors[i * 3] = 0.55 + Math.random() * 0.15;
+                    colors[i * 3 + 1] = 0.82 + Math.random() * 0.12;
+                    colors[i * 3 + 2] = 1.0;
+                }
+
+                sparkData.push({
+                    speedX: (Math.random() - 0.5) * 0.4,
+                    speedY: 0.15 + Math.random() * 0.3,
+                    speedZ: (Math.random() - 0.5) * 0.4,
+                    swaySpeed: 0.5 + Math.random() * 1.5,
+                    swayRadius: 0.05 + Math.random() * 0.15,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.025,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.85,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                map: createSparkTexture()
+            });
+
+            sparkGroup = new THREE.Group();
+            scene.add(sparkGroup);
+            sparkParticles = new THREE.Points(geometry, material);
+            sparkGroup.add(sparkParticles);
+        }
+
+        createSparks();
+
+        // ---------- Resize ----------
+        function onWindowResize() {
+            sizes.width = window.innerWidth;
+            sizes.height = window.innerHeight;
+            camera.aspect = sizes.width / sizes.height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(sizes.width, sizes.height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            shaderUniforms.uResolution.value.set(sizes.width, sizes.height);
+        }
+
+        // ---------- Pointer ----------
+        window.addEventListener('mousemove', (event) => {
+            cursorX = event.clientX;
+            cursorY = event.clientY;
+            const cursorInner = document.querySelector('.cursor-inner');
+            if (cursorInner) { cursorInner.style.left = cursorX + 'px'; cursorInner.style.top = cursorY + 'px'; }
+            targetMouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            targetMouseY = (event.clientY / window.innerHeight) * 2 - 1;
+        });
+        window.addEventListener('resize', onWindowResize);
+
+        // ---------- Per-letter title split ----------
+        function splitTitlesIntoChars() {
+            const titles = document.querySelectorAll('.slide-title');
+            titles.forEach(title => {
+                const text = title.innerHTML;
+                let newHTML = '';
+                let delayCounter = 0;
+                const parts = text.split(/(<br\s*\/?>)/i);
+                parts.forEach(part => {
+                    if (part.toLowerCase().startsWith('<br')) {
+                        newHTML += part;
+                    } else {
+                        for (let i = 0; i < part.length; i++) {
+                            if (part[i] === ' ') {
+                                newHTML += ' ';
+                            } else {
+                                newHTML += '<span class="char" style="transition-delay: ' + (delayCounter * 0.035) + 's">' + part[i] + '</span>';
+                                delayCounter++;
+                            }
+                        }
+                    }
+                });
+                title.innerHTML = newHTML;
+            });
+        }
+        splitTitlesIntoChars();
+
+        // ---------- Slides + stories progress ----------
+        function updateSlides(scroll) {
+            for (let i = 1; i <= 4; i++) {
+                const fill = document.getElementById('dash-fill-' + i);
+                if (fill) {
+                    const start = (i - 1) * 0.25;
+                    const end = i * 0.25;
+                    let progress = (scroll - start) / (end - start);
+                    progress = Math.max(0, Math.min(1, progress));
+                    fill.style.height = (progress * 100) + '%';
+                }
+            }
+
+            function isActive(val, start, end) { return val >= start && val <= end; }
+
+            const ranges = [
+                { el: document.getElementById('slide-1'), start: 0.0,  end: 0.22 },
+                { el: document.getElementById('slide-2'), start: 0.28, end: 0.48 },
+                { el: document.getElementById('slide-3'), start: 0.54, end: 0.72 },
+                { el: document.getElementById('slide-4'), start: 0.78, end: 1.01 }
+            ];
+
+            ranges.forEach(r => {
+                if (!r.el) return;
+                if (isActive(scroll, r.start, r.end)) r.el.classList.add('active');
+                else r.el.classList.remove('active');
+            });
+        }
+
+        // ---------- Grid dots drift ----------
+        function updateGridDots(scroll) {
+            const dots = document.querySelectorAll('.grid-dot');
+            dots.forEach((dot, i) => {
+                const startY = (i * 17) % 80 + 10;
+                let speed = 90 + (i * 55) % 180;
+                if (i % 2 === 0) speed = -speed;
+                let y = startY + scroll * speed;
+                y = ((y % 100) + 100) % 100;
+                dot.style.top = y + '%';
+            });
+        }
+
+        // ---------- Animate ----------
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const deltaTime = clock.getDelta();
+
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY !== undefined ? window.scrollY
+                : (window.pageYOffset !== undefined ? window.pageYOffset : document.documentElement.scrollTop);
+            const targetScroll = maxScroll > 0 ? scrollTop / maxScroll : 0;
+
+            currentScroll += (targetScroll - currentScroll) * 0.025;
+
+            mouseX += (targetMouseX - mouseX) * 0.05;
+            mouseY += (targetMouseY - mouseY) * 0.05;
+
+            outerCursorX += (cursorX - outerCursorX) * 0.2;
+            outerCursorY += (cursorY - outerCursorY) * 0.2;
+            const cursorOuter = document.querySelector('.cursor-outer');
+            if (cursorOuter) { cursorOuter.style.left = outerCursorX + 'px'; cursorOuter.style.top = outerCursorY + 'px'; }
+
+            // gentle parallax on the spark field
+            if (sparkGroup) {
+                sparkGroup.rotation.y = mouseX * 0.15;
+                sparkGroup.rotation.x = mouseY * 0.08;
+            }
+
+            // sparks physics, turbulent on fast scroll
+            if (sparkParticles) {
+                const positions = sparkParticles.geometry.attributes.position.array;
+                const time = clock.getElapsedTime();
+                const scrollVelocity = Math.abs(targetScroll - currentScroll);
+                const speedMultiplier = 1.0 + scrollVelocity * 9.0;
+                const turbulence = scrollVelocity * 0.8;
+
+                for (let i = 0; i < sparkCount; i++) {
+                    const idx = i * 3;
+                    const data = sparkData[i];
+                    positions[idx]     += data.speedX * deltaTime * speedMultiplier;
+                    positions[idx + 1] += data.speedY * deltaTime * speedMultiplier;
+                    positions[idx + 2] += data.speedZ * deltaTime * speedMultiplier;
+
+                    const currentSway = data.swayRadius * (1.0 + turbulence * 4.0);
+                    positions[idx]     += Math.sin(time * data.swaySpeed + data.phase) * currentSway * deltaTime;
+                    positions[idx + 2] += Math.cos(time * data.swaySpeed + data.phase) * currentSway * deltaTime;
+
+                    if (positions[idx + 1] > 3.0 || Math.abs(positions[idx]) > 3.5 || Math.abs(positions[idx + 2]) > 3.5) {
+                        positions[idx + 1] = -2.5;
+                        positions[idx]     = (Math.random() - 0.5) * 3.0;
+                        positions[idx + 2] = (Math.random() - 0.5) * 3.0;
+                    }
+                }
+                sparkParticles.geometry.attributes.position.needsUpdate = true;
+            }
+
+            // background shader uniforms
+            shaderUniforms.uTime.value = clock.getElapsedTime();
+            shaderUniforms.uMouse.value.set(mouseX, -mouseY);
+            shaderUniforms.uScroll.value = currentScroll;
+
+            updateSlides(currentScroll);
+            updateGridDots(currentScroll);
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // ---------- Contact form ----------
+        const form = document.getElementById('contact-form');
+        const toast = document.getElementById('toast');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (toast) {
+                    toast.classList.add('active');
+                    setTimeout(() => toast.classList.remove('active'), 3200);
+                }
+                form.reset();
+            });
+        }
+
+        // ---------- Smooth anchor scroll ----------
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const id = link.getAttribute('href');
+                if (id && id.length > 1) {
+                    e.preventDefault();
+                    const index = parseInt(id.replace('#slide-', ''), 10);
+                    if (!isNaN(index)) {
+                        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                        const target = ((index - 1) * 0.25 + 0.08) * maxScroll;
+                        window.scrollTo({ top: target, behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
